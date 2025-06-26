@@ -1,0 +1,6 @@
+node_modules/
+uploads/
+output.csv
+output_crm_upload.csv
+.env
+.DS_Store
