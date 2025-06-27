@@ -100,14 +100,23 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
   const countryRaw = fallback(row['Company Country'], row['Country'])
   const countryAbbrev = COUNTRY_ABBREVIATIONS[countryRaw] || countryRaw
 
-  const rawDirect = row['Direct Phone Number'] || row['Company HQ Phone'] || ''
+  const rawDirect =
+    fallback(row['Direct Phone Number'], row['Company HQ Phone']) || ''
   const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone']) || ''
 
   const cleanedDirect = cleanPhone(rawDirect)
   const cleanedMobile = cleanPhone(rawMobile)
 
-  const businessPhone = cleanedDirect
-  const mobilePhone = cleanedDirect === cleanedMobile ? '' : cleanedMobile
+  let businessPhone = ''
+  let mobilePhone = ''
+
+  if (cleanedDirect && cleanedDirect === cleanedMobile) {
+    businessPhone = cleanedDirect
+    mobilePhone = ''
+  } else {
+    businessPhone = cleanedDirect
+    mobilePhone = cleanedMobile
+  }
 
   return {
     'First Name': row['First Name'] || '',
