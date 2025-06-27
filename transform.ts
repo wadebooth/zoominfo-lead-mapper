@@ -100,6 +100,13 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
   const countryRaw = fallback(row['Company Country'], row['Country'])
   const countryAbbrev = COUNTRY_ABBREVIATIONS[countryRaw] || countryRaw
 
+  const directPhone = cleanPhone(
+    row['Direct Phone Number'] || row['Company HQ Phone'] || ''
+  )
+  const mobilePhone = cleanPhone(row['Mobile phone'] || '')
+
+  const useSamePhone = directPhone && mobilePhone && directPhone === mobilePhone
+
   return {
     'First Name': row['First Name'] || '',
     'Last Name': row['Last Name'] || '',
@@ -108,10 +115,8 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     'Job Role': row['Department'] || 'Unknown',
     'Job Function': row['Job Function'] || 'Unknown',
     'Email Address': row['Email Address'] || row['Personal Email'] || '',
-    'Business Phone': cleanPhone(
-      row['Direct Phone Number'] || row['Company HQ Phone'] || ''
-    ),
-    'Mobile Phone': cleanPhone(row['Mobile phone'] || ''),
+    'Business Phone': directPhone,
+    'Mobile Phone': useSamePhone ? '' : mobilePhone,
     Company: row['Company Name'] || '',
     'Address 1': '',
     'Address 2': '',
