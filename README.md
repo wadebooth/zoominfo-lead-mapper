@@ -1,4 +1,3 @@
-Lead List Upload Mapper
 This Lead List Upload Mapper is a lightweight web-based tool designed to convert ZoomInfo CSV exports into a CRM-ready lead upload format. It supports automatic normalization of data fields such as state and country abbreviations, phone formatting, deduplication of business vs. mobile numbers, and auto-generates campaign-specific metadata.
 
 🚀 Features
