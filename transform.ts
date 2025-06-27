@@ -101,7 +101,7 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
   const countryAbbrev = COUNTRY_ABBREVIATIONS[countryRaw] || countryRaw
 
   const rawDirect = row['Direct Phone Number'] || row['Company HQ Phone'] || ''
-  const rawMobile = row['Mobile phone'] || ''
+  const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone']) || ''
 
   const cleanedDirect = cleanPhone(rawDirect)
   const cleanedMobile = cleanPhone(rawMobile)
@@ -125,7 +125,8 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     City: fallback(row['Company City'], row['Person City']),
     'State or Province': stateAbbrev,
     Country: countryAbbrev,
-    'Zip or Postal Code': '',
+    'Zip or Postal Code':
+      fallback(row['Company Zip'], row['Person Zip'], row['Zip']) || '',
     'Lead Source Recent': 'ADR Prospecting-IT-AMS West Sourced',
     'Member Status': '',
     ExplicitConsentDate: '',
