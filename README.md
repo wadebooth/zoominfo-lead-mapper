@@ -82,4 +82,5 @@ Email notifications when file is ready
 
 🙌 Contributing
 Pull requests are welcome! Please open an issue first to discuss any major changes.
+-wade
 
