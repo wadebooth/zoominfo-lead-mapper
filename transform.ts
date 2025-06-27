@@ -1,6 +1,10 @@
 // @ts-ignore
 const { parse } = require('json2csv')
 
+/* --- Constants --- */
+
+const ASSIGNED_TO = 'your.email@servicenow.com'
+
 export const STATE_ABBREVIATIONS: Record<string, string> = {
   Alabama: 'AL',
   Alaska: 'AK',
@@ -72,6 +76,8 @@ export const COUNTRY_ABBREVIATIONS: Record<string, string> = {
   Canada: 'CA',
 }
 
+/* --- Utilities --- */
+
 export function cleanPhone(phone: string): string {
   return phone?.replace(/[^0-9]/g, '') || ''
 }
@@ -85,38 +91,29 @@ export function getListSource(): string {
 }
 
 function fallback(...values: (string | undefined)[]): string {
-  for (const v of values) {
-    if (v && v.trim()) return v.trim()
-  }
-  return ''
+  return values.find((v) => v?.trim())?.trim() || ''
 }
 
-const ASSIGNED_TO = 'your.email@servicenow.com' // Replace with your actual email
+/* --- Core Mapping --- */
 
 export function mapRow(row: Record<string, string>): Record<string, string> {
-  const stateRaw = fallback(row['Company State'], row['Person State'])
-  const stateAbbrev = STATE_ABBREVIATIONS[stateRaw] || stateRaw
+  const state =
+    STATE_ABBREVIATIONS[fallback(row['Company State'], row['Person State'])] ||
+    ''
+  const country =
+    COUNTRY_ABBREVIATIONS[fallback(row['Company Country'], row['Country'])] ||
+    ''
 
-  const countryRaw = fallback(row['Company Country'], row['Country'])
-  const countryAbbrev = COUNTRY_ABBREVIATIONS[countryRaw] || countryRaw
+  const rawDirect = fallback(
+    row['Direct Phone Number'],
+    row['Company HQ Phone']
+  )
+  const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone'])
+  const direct = cleanPhone(rawDirect)
+  const mobile = cleanPhone(rawMobile)
 
-  const rawDirect =
-    fallback(row['Direct Phone Number'], row['Company HQ Phone']) || ''
-  const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone']) || ''
-
-  const cleanedDirect = cleanPhone(rawDirect)
-  const cleanedMobile = cleanPhone(rawMobile)
-
-  let businessPhone = ''
-  let mobilePhone = ''
-
-  if (cleanedDirect && cleanedDirect === cleanedMobile) {
-    businessPhone = cleanedDirect
-    mobilePhone = ''
-  } else {
-    businessPhone = cleanedDirect
-    mobilePhone = cleanedMobile
-  }
+  const businessPhone = direct
+  const mobilePhone = direct === mobile ? '' : mobile
 
   return {
     'First Name': row['First Name'] || '',
@@ -132,10 +129,13 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     'Address 1': '',
     'Address 2': '',
     City: fallback(row['Company City'], row['Person City']),
-    'State or Province': stateAbbrev,
-    Country: countryAbbrev,
-    'Zip or Postal Code':
-      fallback(row['Company Zip'], row['Person Zip'], row['Zip']) || '',
+    'State or Province': state,
+    Country: country,
+    'Zip or Postal Code': fallback(
+      row['Company Zip'],
+      row['Person Zip'],
+      row['Zip']
+    ),
     'Lead Source Recent': 'ADR Prospecting-IT-AMS West Sourced',
     'Member Status': '',
     ExplicitConsentDate: '',
@@ -162,7 +162,9 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     'Process Rule': '',
   }
 }
-//test
+
+/* --- Headers --- */
+
 export const HEADERS = [
   'First Name',
   'Last Name',
@@ -205,6 +207,8 @@ export const HEADERS = [
   'Marketing Suspended Reason',
   'Process Rule',
 ]
+
+/* --- CSV Conversion --- */
 
 export function convertToCSV(data: Record<string, string>[]): string {
   return parse(data, { fields: HEADERS })
