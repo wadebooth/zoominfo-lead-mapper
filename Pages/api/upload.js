@@ -1,6 +1,6 @@
-import formidable from 'formidable'
-import { readFileSync } from 'fs'
-import { parse } from 'csv-parse/sync'
+const formidable = require('formidable')
+const { readFileSync } = require('fs')
+const { parse } = require('csv-parse/sync')
 
 // disable bodyParser to let formidable handle it
 export const config = {
@@ -24,12 +24,7 @@ export default async function handler(req, res) {
     const fileContent = readFileSync(filePath)
     const records = parse(fileContent, { columns: true })
 
-    // ... your logic to map and transform rows ...
-
-    const output = [
-      Object.keys(records[0]).join(','), // headers
-      ...records.map((row) => Object.values(row).join(',')), // rows
-    ].join('\n')
+    // logic to generate output...
 
     res.setHeader('Content-Type', 'text/csv')
     res.setHeader('Content-Disposition', 'attachment; filename="mapped.csv"')
