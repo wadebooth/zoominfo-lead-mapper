@@ -78,8 +78,11 @@ export const COUNTRY_ABBREVIATIONS: Record<string, string> = {
 
 /* --- Utilities --- */
 
-export function cleanPhone(phone: string): string {
-  return phone?.replace(/[^0-9]/g, '') || ''
+function cleanPhone(phone: string): string {
+  const digits = phone?.replace(/\D/g, '') || ''
+  if (digits.length === 10) return digits
+  if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1)
+  return '' // Invalid
 }
 
 export function getListSource(): string {
@@ -104,16 +107,26 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     COUNTRY_ABBREVIATIONS[fallback(row['Company Country'], row['Country'])] ||
     ''
 
-  const rawDirect = fallback(
-    row['Direct Phone Number'],
-    row['Company HQ Phone']
-  )
-  const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone'])
-  const direct = cleanPhone(rawDirect)
-  const mobile = cleanPhone(rawMobile)
+  const rawDirect =
+    fallback(row['Direct Phone Number'], row['Company HQ Phone']) || ''
+  const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone']) || ''
 
-  const businessPhone = direct
-  const mobilePhone = direct === mobile ? '' : mobile
+  const cleanedDirect = cleanPhone(rawDirect)
+  const cleanedMobile = cleanPhone(rawMobile)
+
+  let businessPhone = ''
+  let mobilePhone = ''
+
+  if (cleanedDirect && cleanedDirect === cleanedMobile) {
+    businessPhone = cleanedDirect
+    mobilePhone = ''
+  } else {
+    businessPhone = cleanedDirect || cleanedMobile || '0000000000' // fallback
+    mobilePhone =
+      cleanedDirect && cleanedMobile && cleanedMobile !== cleanedDirect
+        ? cleanedMobile
+        : ''
+  }
 
   return {
     'First Name': row['First Name'] || '',

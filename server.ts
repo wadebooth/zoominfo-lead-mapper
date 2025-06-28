@@ -16,11 +16,17 @@ app.post(
   '/upload',
   upload.single('file'),
   (req: Request, res: Response): void => {
-    const inputPath = req.file?.path
+    if (!req.file || !req.file.path) {
+      res.status(400).send('No file uploaded.')
+      return
+    }
+
+    const inputPath = req.file.path
     const results: Record<string, string>[] = []
 
-    if (!inputPath) {
-      res.status(400).send('No file uploaded.')
+    if (!req.file.originalname.endsWith('.csv')) {
+      fs.unlinkSync(inputPath)
+      res.status(400).send('Only CSV files are allowed.')
       return
     }
 
@@ -28,16 +34,22 @@ app.post(
       .pipe(csv())
       .on('data', (data) => results.push(mapRow(data)))
       .on('end', () => {
-        const timestamp = new Date().toISOString().split('T')[0] // e.g., 2025-06-26
-        const outputFilename = `mapped-zoominfo-leads-${timestamp}.csv`
-        const outputPath = path.join('uploads', outputFilename)
-
-        fs.writeFileSync(outputPath, convertToCSV(results))
-
-        res.download(outputPath, outputFilename, (err) => {
+        if (results.length === 0) {
           fs.unlinkSync(inputPath)
-          fs.unlinkSync(outputPath)
-          if (err) console.error('❌ File download failed:', err)
+          res
+            .status(400)
+            .send('The uploaded CSV is empty or contains no usable rows.')
+          return
+        }
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+        const outputFile = `output-${timestamp}.csv`
+
+        const csvOutput = convertToCSV(results)
+        fs.writeFileSync(outputFile, csvOutput)
+        res.download(outputFile, () => {
+          fs.unlinkSync(inputPath)
+          fs.unlinkSync(outputFile)
         })
       })
   }

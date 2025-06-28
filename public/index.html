@@ -60,6 +60,13 @@
         max-width: 500px;
         line-height: 1.4;
       }
+
+      #error-message {
+        color: red;
+        font-size: 0.9rem;
+        display: none;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
@@ -70,18 +77,22 @@
         Things to Keep in Mind
       </h2>
       <ul style="margin-top: 0.5rem; padding-left: 1.25rem; line-height: 1.6">
-        <li><strong>Step 1:</strong> Export your ZoomInfo list as a CSV.</li>
         <li>
-          <strong>Step 2:</strong> Upload the file using the uploader below.
+          <strong>Step 1:</strong> Export your ZoomInfo list as a CSV only.
+        </li>
+        <li>
+          <strong>Step 2:</strong> Upload the file using the
+          <code>Choose File</code> button below.
         </li>
         <li>
           <strong>Step 3:</strong> After conversion, download the mapped CSV
-          file. Copy the contact data and paste it into your CRM upload
-          template.<br />
+          file by clicking the blue button. Copy the contact data and paste it
+          into your CRM upload template.<br />
           <em>Tip:</em> Click cell A2, then press
-          <code>Shift + Cmd + →</code> followed by <code>↓</code> to highlight
-          all data. Use <code>Cmd + C</code> to copy, then paste into the first
-          open row under column A using <code>Cmd + V</code>.
+          <code>Shift + Cmd + →</code> followed by
+          <code>Shift + Cmd + ↓</code> to highlight all data. Use
+          <code>Cmd + C</code> to copy, then paste into the first open row under
+          column A using <code>Cmd + V</code>.
         </li>
         <li>
           <strong>Job Role & Function:</strong> ZoomInfo data can be
@@ -91,24 +102,52 @@
         </li>
         <li>
           <strong>Assigned To:</strong> The output defaults to
-          <code>your.name@email.com</code>. Make sure to replace this with your
+          <code>your.name@email.com</code>. Be sure to replace this with your
           actual email (e.g., <code>john.doe@company.com</code>) before
-          uploading.
+          uploading to your CRM upload list.
         </li>
       </ul>
     </section>
 
-    <form action="/upload" method="POST" enctype="multipart/form-data">
+    <form
+      id="uploadForm"
+      action="/upload"
+      method="POST"
+      enctype="multipart/form-data"
+    >
       <input type="file" name="file" accept=".csv" required />
       <button type="submit">Upload & Convert</button>
+      <p id="error-message">Please select a CSV file before uploading.</p>
     </form>
+
+    <script>
+      const form = document.getElementById('uploadForm')
+      const fileInput = form.querySelector('input[type="file"]')
+      const errorMessage = document.getElementById('error-message')
+
+      form.addEventListener('submit', function (e) {
+        if (!fileInput.files.length) {
+          e.preventDefault()
+          errorMessage.style.display = 'block'
+        } else {
+          errorMessage.style.display = 'none'
+        }
+      })
+    </script>
 
     <div class="footer">
       <p>
-        NOTE: This tool does not store files. All data is processed client-side
-        and discarded immediately after conversion. This tool is an open-source
-        personal project, and is not affiliated with any company. 
+        NOTE: This tool does not upload or store any data. Everything is
+        processed directly in your browser using what's called
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Glossary/Client-side"
+          target="_blank"
+          style="color: #007bff; text-decoration: underline"
+        >
+          client-side processing </a
+        >. This tool is an open-source personal project, and is not affiliated
+        with any specific company. Built by Wade Booth.
       </p>
-
+    </div>
   </body>
 </html>
