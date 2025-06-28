@@ -208,25 +208,40 @@ const COUNTRY_ABBREVIATIONS: Record<string, string> = {
 /* --- Main Mapping --- */
 
 export function mapRow(row: Record<string, string>): Record<string, string> {
-  const state =
-    STATE_ABBREVIATIONS[fallback(row['Company State'], row['Person State'])] ||
-    ''
-  const country =
-    COUNTRY_ABBREVIATIONS[fallback(row['Company Country'], row['Country'])] ||
-    ''
+  const normalize = (val = '') => val.trim().toUpperCase()
+  const stateRaw = fallback(row['Company State'], row['Person State'])
+  const normalizedState = normalize(stateRaw)
+  const state = STATE_ABBREVIATIONS[normalizedState] || normalizedState
+
+  const countryRaw = fallback(row['Company Country'], row['Country'])
+  const normalizedCountry = normalize(countryRaw)
+  const country = COUNTRY_ABBREVIATIONS[normalizedCountry] || normalizedCountry
 
   const jobTitle = row['Job Title'] || ''
-  const lowerTitle = jobTitle.toLowerCase()
+  const upperTitle = jobTitle.toUpperCase()
   const department = row['Department']?.trim() || ''
-
-  const isCSuite =
-    lowerTitle.includes('chief') ||
-    validCSuiteRoles.includes(jobTitle.trim().toUpperCase())
 
   let finalJobFunction = 'Other'
   let finalJobRole = 'Other'
 
-  if (!isCSuite && validJobRoles.includes(department)) {
+  const tokens = upperTitle
+    .split(/[/,&|]+/)
+    .map((t) => t.trim())
+    .filter(Boolean)
+
+  const allAreCSuite = tokens.every((t) => validCSuiteRoles.includes(t))
+  const anyAreCSuite = tokens.some((t) => validCSuiteRoles.includes(t))
+
+  if (allAreCSuite) {
+    const primary = tokens.find((t) => csuiteRoleMap[t])
+    if (primary) {
+      finalJobFunction = primary
+      finalJobRole = csuiteRoleMap[primary]
+    }
+  } else if (anyAreCSuite) {
+    finalJobFunction = 'Other'
+    finalJobRole = 'Other'
+  } else if (validJobRoles.includes(department)) {
     finalJobRole = department
     finalJobFunction = `${department} - Other`
   }

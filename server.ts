@@ -13,9 +13,9 @@ const PORT = 3000
 app.use(express.static('public'))
 
 app.post(
-  '/upload',
+  '/api/upload',
   upload.single('file'),
-  (req: Request, res: Response): void => {
+  async (req: Request, res: Response) => {
     if (!req.file || !req.file.path) {
       res.status(400).send('No file uploaded.')
       return
