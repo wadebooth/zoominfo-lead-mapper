@@ -3,7 +3,7 @@ const { parse } = require('json2csv')
 
 /* --- Constants --- */
 
-const ASSIGNED_TO = 'your.email@servicenow.com'
+const ASSIGNED_TO = 'your.email@company.com'
 
 export const STATE_ABBREVIATIONS: Record<string, string> = {
   Alabama: 'AL',
