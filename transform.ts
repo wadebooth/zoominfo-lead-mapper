@@ -1,12 +1,140 @@
 // @ts-ignore
 const { parse } = require('json2csv')
-import mapping from './job-level-mapping.json'
-
-/* --- Constants --- */
+import jobLevelMapping from './job-level-mapping.json'
 
 const ASSIGNED_TO = 'your.email@company.com'
 
-export const STATE_ABBREVIATIONS: Record<string, string> = {
+/* --- Helpers --- */
+
+const fallback = (...values: (string | undefined)[]) =>
+  values.find((v) => v?.trim())?.trim() || ''
+
+const cleanPhone = (phone: string) => {
+  const digits = phone?.replace(/\D/g, '') || ''
+  if (digits.length === 10) return digits
+  if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1)
+  return ''
+}
+
+export const getListSource = () => {
+  const now = new Date()
+  const day = String(now.getDate()).padStart(2, '0')
+  const month = now.toLocaleString('en-US', { month: 'short' }).toUpperCase()
+  const year = now.getFullYear().toString().slice(-2)
+  return `Import-Zoominfo-WestOutbound-${day}${month}${year}`
+}
+
+/* --- Job Logic --- */
+
+export const validJobRoles = [
+  'Cloud Operations',
+  'Customer Service/Support',
+  'Facilities',
+  'Field Service',
+  'Finance/Accounting',
+  'Global Business Services/Shared Services',
+  'Governance, Risk and Compliance',
+  'HR',
+  'IT',
+  'Legal',
+  'Marketing',
+  'Operations/Engineering/R&D',
+  'Other',
+  'Sales',
+  'Security',
+  'Supply Chain/Manufacturing',
+  'CEO',
+]
+
+export const validCSuiteRoles = [
+  'CAO',
+  'CCO',
+  'CDAO',
+  'CDO',
+  'CEO',
+  'CFO',
+  'CHRO',
+  'CIO',
+  'CISO/CSO',
+  'CLO',
+  'CMO',
+  'COO',
+  'CPO',
+  'CRO',
+  'CSCO',
+  'CTO',
+  'General Counsel',
+  'CAIO',
+]
+
+const csuiteFunctionMap: Record<string, string> = {
+  'chief accounting officer': 'CAO',
+  'chief compliance officer': 'CCO',
+  'chief commercial officer': 'CCO',
+  'chief data & analytics officer': 'CDAO',
+  'chief data officer': 'CDO',
+  'chief digital officer': 'CDO',
+  'chief executive officer': 'CEO',
+  'chief financial officer': 'CFO',
+  'chief human resources officer': 'CHRO',
+  'chief information officer': 'CIO',
+  'chief information security officer': 'CISO/CSO',
+  'chief security officer': 'CISO/CSO',
+  'chief legal officer': 'CLO',
+  'chief learning officer': 'CLO',
+  'chief marketing officer': 'CMO',
+  'chief operating officer': 'COO',
+  'chief product officer': 'CPO',
+  'chief procurement officer': 'CPO',
+  'chief revenue officer': 'CRO',
+  'chief risk officer': 'CRO',
+  'chief supply chain officer': 'CSCO',
+  'chief technology officer': 'CTO',
+  'general counsel': 'General Counsel',
+  'chief ai officer': 'CAIO',
+}
+
+const csuiteRoleMap: Record<string, string> = {
+  CAIO: 'IT',
+  CAO: 'Finance/Accounting',
+  CCO: 'Governance, Risk and Compliance',
+  CDAO: 'IT',
+  CDO: 'Customer Service/Support',
+  CEO: 'CEO',
+  CFO: 'Finance/Accounting',
+  CHRO: 'HR',
+  CIO: 'IT',
+  'CISO/CSO': 'Security',
+  CLO: 'Legal',
+  CMO: 'Marketing',
+  COO: 'Operations/Engineering/R&D',
+  CPO: 'Supply Chain/Manufacturing',
+  CRO: 'Sales',
+  CSCO: 'Supply Chain/Manufacturing',
+  CTO: 'IT',
+  'General Counsel': 'Legal',
+}
+
+const mapJobLevel = (title: string = ''): string => {
+  const lower = title.toLowerCase()
+  for (const [level, keywords] of Object.entries(jobLevelMapping)) {
+    if (
+      Array.isArray(keywords) &&
+      keywords.some((k: string) =>
+        new RegExp(
+          `\\b${k.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`
+        ).test(lower)
+      )
+    ) {
+      return level
+    }
+  }
+  return 'Other'
+}
+
+/* --- Location Abbreviations --- */
+
+const STATE_ABBREVIATIONS: Record<string, string> = {
   Alabama: 'AL',
   Alaska: 'AK',
   Arizona: 'AZ',
@@ -72,59 +200,12 @@ export const STATE_ABBREVIATIONS: Record<string, string> = {
   Yukon: 'YT',
 }
 
-export const COUNTRY_ABBREVIATIONS: Record<string, string> = {
+const COUNTRY_ABBREVIATIONS: Record<string, string> = {
   'United States': 'US',
   Canada: 'CA',
 }
 
-const JOB_LEVEL_MAP: Record<string, string> = {
-  'C-Level': 'C-Level',
-  VP: 'Vice President',
-  Director: 'Director/Sr',
-  Manager: 'Manager/Sr',
-  Staff: 'Individual Contributor',
-  Entry: 'Individual Contributor',
-  Partner: 'Other',
-  Owner: 'Other',
-  Board: 'Other',
-  Other: 'Other',
-}
-
-function cleanPhone(phone: string): string {
-  const digits = phone?.replace(/\D/g, '') || ''
-  if (digits.length === 10) return digits
-  if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1)
-  return ''
-}
-
-export function mapJobLevel(title: string): string {
-  const lowerTitle = title?.toLowerCase() || ''
-  for (const [level, keywords] of Object.entries(mapping)) {
-    if (
-      (keywords as string[]).some((keyword) => lowerTitle.includes(keyword))
-    ) {
-      return level
-    }
-  }
-  return 'Other'
-}
-
-export function mapToJobLevel(rawLevel: string): string {
-  const cleaned = rawLevel?.trim()
-  return JOB_LEVEL_MAP[cleaned] || 'Other'
-}
-
-export function getListSource(): string {
-  const now = new Date()
-  const day = String(now.getDate()).padStart(2, '0')
-  const month = now.toLocaleString('en-US', { month: 'short' }).toUpperCase()
-  const year = now.getFullYear().toString().slice(-2)
-  return `Import-Zoominfo-WestOutbound-${day}${month}${year}`
-}
-
-function fallback(...values: (string | undefined)[]): string {
-  return values.find((v) => v?.trim())?.trim() || ''
-}
+/* --- Main Mapping --- */
 
 export function mapRow(row: Record<string, string>): Record<string, string> {
   const state =
@@ -134,60 +215,54 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     COUNTRY_ABBREVIATIONS[fallback(row['Company Country'], row['Country'])] ||
     ''
 
-  const rawDirect =
-    fallback(row['Direct Phone Number'], row['Company HQ Phone']) || ''
-  const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone']) || ''
+  const jobTitle = row['Job Title'] || ''
+  const lowerTitle = jobTitle.toLowerCase()
+  const department = row['Department']?.trim() || ''
 
+  const csuiteKey = Object.keys(csuiteFunctionMap).find((key) =>
+    lowerTitle.includes(key)
+  )
+
+  const isCSuite =
+    lowerTitle.includes('chief') ||
+    validCSuiteRoles.includes(jobTitle.trim().toUpperCase())
+
+  let finalJobFunction = 'Other'
+  let finalJobRole = 'Other'
+
+  if (isCSuite && csuiteKey && csuiteFunctionMap[csuiteKey]) {
+    const csuiteMapped = csuiteFunctionMap[csuiteKey]
+    finalJobFunction = csuiteMapped
+    finalJobRole = csuiteRoleMap[csuiteMapped] || 'Other'
+  } else if (isCSuite) {
+    finalJobFunction = 'Other'
+    finalJobRole = 'Other'
+  } else if (validJobRoles.includes(department)) {
+    finalJobRole = department
+    finalJobFunction = `${department} - Other`
+  }
+
+  const rawDirect = fallback(
+    row['Direct Phone Number'],
+    row['Company HQ Phone']
+  )
+  const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone'])
   const cleanedDirect = cleanPhone(rawDirect)
   const cleanedMobile = cleanPhone(rawMobile)
 
-  let businessPhone = ''
-  let mobilePhone = ''
-
-  if (cleanedDirect && cleanedDirect === cleanedMobile) {
-    businessPhone = cleanedDirect
-    mobilePhone = ''
-  } else {
-    businessPhone = cleanedDirect || cleanedMobile || '0000000000'
-    mobilePhone =
-      cleanedDirect && cleanedMobile && cleanedMobile !== cleanedDirect
-        ? cleanedMobile
-        : ''
-  }
-
-  const jobTitle = row['Job Title'] || ''
-  const isCEO = jobTitle.toLowerCase().includes('ceo')
-
-  const validJobRoles = [
-    'Cloud Operations',
-    'Customer Service/Support',
-    'Facilities',
-    'Field Service',
-    'Finance/Accounting',
-    'Global Business Services/Shared Services',
-    'Governance, Risk and Compliance',
-    'HR',
-    'IT',
-    'Legal',
-    'Marketing',
-    'Operations/Engineering/R&D',
-    'Other',
-    'Sales',
-    'Security',
-    'Supply Chain/Manufacturing',
-  ]
-
-  const mappedRole = row['Department'] || 'Other'
-  const finalJobRole =
-    !isCEO && !validJobRoles.includes(mappedRole) ? 'Other' : mappedRole
+  const businessPhone = cleanedDirect || cleanedMobile || '0000000000'
+  const mobilePhone =
+    cleanedDirect && cleanedMobile && cleanedDirect !== cleanedMobile
+      ? cleanedMobile
+      : ''
 
   return {
     'First Name': row['First Name'] || '',
     'Last Name': row['Last Name'] || '',
     Title: jobTitle,
-    'Job Level': mapToJobLevel(row['Management Level']),
+    'Job Level': mapJobLevel(jobTitle),
     'Job Role': finalJobRole,
-    'Job Function': row['Job Function'] || 'Unknown',
+    'Job Function': finalJobFunction,
     'Email Address': row['Email Address'] || row['Personal Email'] || '',
     'Business Phone': businessPhone,
     'Mobile Phone': mobilePhone,
@@ -228,6 +303,8 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     'Process Rule': '',
   }
 }
+
+/* --- Headers --- */
 
 export const HEADERS = [
   'First Name',
@@ -271,6 +348,8 @@ export const HEADERS = [
   'Marketing Suspended Reason',
   'Process Rule',
 ]
+
+/* --- Export to CSV --- */
 
 export function convertToCSV(data: Record<string, string>[]): string {
   return parse(data, { fields: HEADERS })
