@@ -30,17 +30,14 @@ app.post(
       .on('end', () => {
         const timestamp = new Date().toISOString().split('T')[0] // e.g., 2025-06-26
         const outputFilename = `mapped-zoominfo-leads-${timestamp}.csv`
-        const outputPath = path.join(__dirname, outputFilename)
+        const outputPath = path.join('uploads', outputFilename)
 
         fs.writeFileSync(outputPath, convertToCSV(results))
 
         res.download(outputPath, outputFilename, (err) => {
-          // Cleanup temp files after download
           fs.unlinkSync(inputPath)
           fs.unlinkSync(outputPath)
-          if (err) {
-            console.error('Error sending file:', err)
-          }
+          if (err) console.error('❌ File download failed:', err)
         })
       })
   }
