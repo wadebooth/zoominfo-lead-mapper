@@ -20,7 +20,7 @@
         margin-bottom: 1rem;
       }
 
-      form {
+      .upload-section {
         background: white;
         padding: 2rem;
         border-radius: 12px;
@@ -95,44 +95,60 @@
           column A using <code>Cmd + V</code>.
         </li>
         <li>
-          <strong>Job Role & Function:</strong> ZoomInfo data can be
-          inconsistent or too detailed here. If fields are blank or mismatched,
-          input <em>"Other"</em> or <em>"Unknown"</em> to avoid issues during
+          <strong>Job Role & Function:</strong> If fields are blank or
+          mismatched, it will default to <em>"Other"</em> to avoid issues during
           upload.
         </li>
         <li>
           <strong>Assigned To:</strong> The output defaults to
-          <code>your.name@email.com</code>. Be sure to replace this with your
-          actual email (e.g., <code>john.doe@company.com</code>) before
-          uploading to your CRM upload list.
+          <code>your.name@email.com</code>. Replace this with your actual email
+          before uploading.
         </li>
       </ul>
     </section>
 
-    <form
-      id="uploadForm"
-      action="/upload"
-      method="POST"
-      enctype="multipart/form-data"
-    >
-      <input type="file" name="file" accept=".csv" required />
-      <button type="submit">Upload & Convert</button>
+    <div class="upload-section">
+      <input id="csvFile" type="file" accept=".csv" required />
+      <button id="uploadBtn">Upload & Convert</button>
       <p id="error-message">Please select a CSV file before uploading.</p>
-    </form>
+    </div>
 
     <script>
-      const form = document.getElementById('uploadForm')
-      const fileInput = form.querySelector('input[type="file"]')
-      const errorMessage = document.getElementById('error-message')
+      document
+        .getElementById('uploadBtn')
+        .addEventListener('click', async () => {
+          const fileInput = document.getElementById('csvFile')
+          const file = fileInput.files[0]
+          const errorMessage = document.getElementById('error-message')
 
-      form.addEventListener('submit', function (e) {
-        if (!fileInput.files.length) {
-          e.preventDefault()
-          errorMessage.style.display = 'block'
-        } else {
-          errorMessage.style.display = 'none'
-        }
-      })
+          if (!file) {
+            errorMessage.style.display = 'block'
+            return
+          } else {
+            errorMessage.style.display = 'none'
+          }
+
+          const formData = new FormData()
+          formData.append('file', file)
+
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          })
+
+          if (!response.ok) {
+            alert('Failed to convert file.')
+            return
+          }
+
+          const blob = await response.blob()
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = 'mapped.csv'
+          a.click()
+          window.URL.revokeObjectURL(url)
+        })
     </script>
 
     <div class="footer">
