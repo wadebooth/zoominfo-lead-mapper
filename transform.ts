@@ -77,25 +77,41 @@ export const COUNTRY_ABBREVIATIONS: Record<string, string> = {
   Canada: 'CA',
 }
 
-/* --- Utilities --- */
+const JOB_LEVEL_MAP: Record<string, string> = {
+  'C-Level': 'C-Level',
+  VP: 'Vice President',
+  Director: 'Director/Sr',
+  Manager: 'Manager/Sr',
+  Staff: 'Individual Contributor',
+  Entry: 'Individual Contributor',
+  Partner: 'Other',
+  Owner: 'Other',
+  Board: 'Other',
+  Other: 'Other',
+}
 
 function cleanPhone(phone: string): string {
   const digits = phone?.replace(/\D/g, '') || ''
   if (digits.length === 10) return digits
   if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1)
-  return '' // Invalid
+  return ''
 }
 
 export function mapJobLevel(title: string): string {
   const lowerTitle = title?.toLowerCase() || ''
-
   for (const [level, keywords] of Object.entries(mapping)) {
-    if (keywords.some((keyword) => lowerTitle.includes(keyword))) {
+    if (
+      (keywords as string[]).some((keyword) => lowerTitle.includes(keyword))
+    ) {
       return level
     }
   }
-
   return 'Other'
+}
+
+export function mapToJobLevel(rawLevel: string): string {
+  const cleaned = rawLevel?.trim()
+  return JOB_LEVEL_MAP[cleaned] || 'Other'
 }
 
 export function getListSource(): string {
@@ -109,8 +125,6 @@ export function getListSource(): string {
 function fallback(...values: (string | undefined)[]): string {
   return values.find((v) => v?.trim())?.trim() || ''
 }
-
-/* --- Core Mapping --- */
 
 export function mapRow(row: Record<string, string>): Record<string, string> {
   const state =
@@ -134,19 +148,45 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     businessPhone = cleanedDirect
     mobilePhone = ''
   } else {
-    businessPhone = cleanedDirect || cleanedMobile || '0000000000' // fallback
+    businessPhone = cleanedDirect || cleanedMobile || '0000000000'
     mobilePhone =
       cleanedDirect && cleanedMobile && cleanedMobile !== cleanedDirect
         ? cleanedMobile
         : ''
   }
 
+  const jobTitle = row['Job Title'] || ''
+  const isCEO = jobTitle.toLowerCase().includes('ceo')
+
+  const validJobRoles = [
+    'Cloud Operations',
+    'Customer Service/Support',
+    'Facilities',
+    'Field Service',
+    'Finance/Accounting',
+    'Global Business Services/Shared Services',
+    'Governance, Risk and Compliance',
+    'HR',
+    'IT',
+    'Legal',
+    'Marketing',
+    'Operations/Engineering/R&D',
+    'Other',
+    'Sales',
+    'Security',
+    'Supply Chain/Manufacturing',
+  ]
+
+  const mappedRole = row['Department'] || 'Other'
+  const finalJobRole =
+    !isCEO && !validJobRoles.includes(mappedRole) ? 'Other' : mappedRole
+
   return {
     'First Name': row['First Name'] || '',
     'Last Name': row['Last Name'] || '',
-    Title: row['Job Title'] || '',
-    'Job Level': row['Management Level'] || 'Unknown',
-    'Job Role': row['Department'] || 'Unknown',
+    Title: jobTitle,
+    'Job Level': mapToJobLevel(row['Management Level']),
+    'Job Role': finalJobRole,
     'Job Function': row['Job Function'] || 'Unknown',
     'Email Address': row['Email Address'] || row['Personal Email'] || '',
     'Business Phone': businessPhone,
@@ -188,8 +228,6 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     'Process Rule': '',
   }
 }
-
-/* --- Headers --- */
 
 export const HEADERS = [
   'First Name',
@@ -233,8 +271,6 @@ export const HEADERS = [
   'Marketing Suspended Reason',
   'Process Rule',
 ]
-
-/* --- CSV Conversion --- */
 
 export function convertToCSV(data: Record<string, string>[]): string {
   return parse(data, { fields: HEADERS })

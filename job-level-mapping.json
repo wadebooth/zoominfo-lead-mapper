@@ -1,6 +1,8 @@
 {
   "C-Level": ["chief", "ceo", "cfo", "coo", "cio", "cto", "cmo", "c-level"],
-  "Vice President/SVP": ["vp", "vice president", "svp"],
+
+  "Vice President": ["vice president", "vp", "svp", "avp", "evp"],
+
   "Director/Sr": ["director", "head of"],
   "Manager/Sr": ["manager", "mgr"],
   "Architect": ["architect"],
