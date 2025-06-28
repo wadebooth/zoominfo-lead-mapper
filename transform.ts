@@ -1,5 +1,6 @@
 // @ts-ignore
 const { parse } = require('json2csv')
+import mapping from './job-level-mapping.json'
 
 /* --- Constants --- */
 
@@ -83,6 +84,18 @@ function cleanPhone(phone: string): string {
   if (digits.length === 10) return digits
   if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1)
   return '' // Invalid
+}
+
+export function mapJobLevel(title: string): string {
+  const lowerTitle = title?.toLowerCase() || ''
+
+  for (const [level, keywords] of Object.entries(mapping)) {
+    if (keywords.some((keyword) => lowerTitle.includes(keyword))) {
+      return level
+    }
+  }
+
+  return 'Other'
 }
 
 export function getListSource(): string {

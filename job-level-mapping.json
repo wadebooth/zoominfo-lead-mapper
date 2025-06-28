@@ -1,0 +1,12 @@
+{
+  "C-Level": ["chief", "ceo", "cfo", "coo", "cio", "cto", "cmo", "c-level"],
+  "Vice President/SVP": ["vp", "vice president", "svp"],
+  "Director/Sr": ["director", "head of"],
+  "Manager/Sr": ["manager", "mgr"],
+  "Architect": ["architect"],
+  "Developer/Engineer": ["developer", "engineer", "software engineer"],
+  "Individual Contributor": ["associate", "contributor", "staff", "rep"],
+  "Press Analyst/Media": ["analyst", "press", "media"],
+  "System Administrator": ["system administrator", "sysadmin"],
+  "Other": []
+}
