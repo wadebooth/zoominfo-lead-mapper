@@ -18,41 +18,30 @@ export default function HomePage() {
 
     setLoading(true)
 
-    const formData = new FormData()
-    formData.append('file', file)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
 
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    })
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      if (!response.ok) {
+        alert('Failed to convert file.')
+        return
+      }
 
-    setLoading(false)
-
-    if (!response.ok) {
-      alert('Failed to convert file.')
-      return
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'mapped.csv'
+      a.click()
+      window.URL.revokeObjectURL(url)
+      fileInput.value = ''
+    } finally {
+      setLoading(false)
     }
-
-    const blob = await response.blob()
-
-    // after `const blob = await response.blob()`
-    const today = new Date()
-    const dd = String(today.getDate()).padStart(2, '0') // "30"
-    const mon = today.toLocaleString('en-US', { month: 'short' }).toUpperCase() // "JUN"
-    const yy = String(today.getFullYear()).slice(-2) // "25"
-    const dateCode = `${dd}${mon}${yy}` // "30JUN25"
-
-    // now pick a template that makes sense:
-    // e.g. region + source + date
-    const filename = `WestOutbound_ZoomInfo_${dateCode}.csv`
-
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    a.click()
-    window.URL.revokeObjectURL(url)
-    fileInput.value = ''
   }
 
   return (
@@ -109,7 +98,7 @@ export default function HomePage() {
           }
           .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #fff;
+            border-top: 4px solid #007bff;
             border-radius: 50%;
             width: 20px;
             height: 20px;
@@ -127,6 +116,10 @@ export default function HomePage() {
             text-align: center;
             max-width: 500px;
             line-height: 1.4;
+          }
+          .github-link {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
           }
           #error-message {
             color: red;
@@ -150,40 +143,32 @@ export default function HomePage() {
           }}
         >
           <li>
-            <strong>Step 1:</strong> Export your full ZoomInfo list to Excel,
-            then “Save As” CSV. No need to delete or rearrange any columns.
+            <strong>Step 1:</strong> Export your ZoomInfo list as a CSV only.
           </li>
           <li>
-            <strong>Step 2:</strong> Click <code>Choose File</code> below and
-            select your newly saved CSV.
+            <strong>Step 2:</strong> Upload the file using the{' '}
+            <code>Choose File</code> button below.
           </li>
           <li>
-            <strong>Step 3:</strong> Hit the blue button. When it finishes, your
-            mapped file will download automatically.
-            <br />
-            <em>Tip:</em> To paste straight into your CRM, click cell A2, press{' '}
-            <code>Shift + ⌘ + →</code> then <code>Shift + ⌘ + ↓</code> to select
-            all, then <code>⌘ + C</code>. Switch to shared Excel for upload,
-            select the first empty cell in column A, and use <code>⌘ + V</code>.
+            <strong>Step 3:</strong> After conversion, download the mapped CSV
+            file by clicking the blue button.
           </li>
           <li>
-            <strong>Job Role & Function:</strong> Blank or unrecognized titles
-            default to <em>"Other"</em>. If your data is missing key info,
-            you’ll see empty fields—so double-check before importing.
+            <strong>Job Role & Function:</strong> Defaults to "Other" if blank
+            or mismatched.
           </li>
           <li>
             <strong>Assigned To:</strong> Defaults to{' '}
-            <code>your.name@email.com</code>. Be sure to replace it with your
-            own address. Happy converting!
+            <code>your.email@company.com</code>. Replace with your email.
           </li>
         </ul>
       </section>
 
       <div className='upload-section'>
-        <input id='csvFile' type='file' accept='.csv' />
+        <input id='csvFile' type='file' accept='.csv' required />
         <button onClick={handleUpload} disabled={loading}>
           {loading ? 'Processing' : 'Upload & Convert'}
-          {loading && <div className='spinner' />}
+          {loading && <span className='spinner' />}
         </button>
         {errorMessage && <p id='error-message'>{errorMessage}</p>}
       </div>
@@ -191,13 +176,11 @@ export default function HomePage() {
       <div className='footer'>
         <p>
           NOTE: This tool does not upload or store any data. Everything is
-          processed directly in your browser using what's called client-side
-          processing. This tool is an open-source personal project, and isn't
-          affiliated with any specific company. Built by Wade Booth.
+          processed directly in your browser. Built by Wade Booth.
         </p>
         <p className='github-link'>
           <a
-            href='https://github.com/wadebooth/zoominfo-lead-mapper'
+            href='https://github.com/wadebooth/zoominfo-lead-upload'
             target='_blank'
             rel='noopener noreferrer'
           >
