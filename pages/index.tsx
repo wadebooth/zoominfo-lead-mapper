@@ -3,6 +3,7 @@ import Head from 'next/head'
 
 export default function HomePage() {
   const [errorMessage, setErrorMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleUpload = async () => {
     const fileInput = document.getElementById('csvFile') as HTMLInputElement
@@ -15,6 +16,8 @@ export default function HomePage() {
       setErrorMessage('')
     }
 
+    setLoading(true)
+
     const formData = new FormData()
     formData.append('file', file)
 
@@ -23,11 +26,13 @@ export default function HomePage() {
       body: formData,
     })
 
+    setLoading(false)
+
     if (!response.ok) {
       alert('Failed to convert file.')
       return
     }
-    //lets see if this works
+
     const blob = await response.blob()
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -74,6 +79,7 @@ export default function HomePage() {
             border-radius: 6px;
           }
           button {
+            position: relative;
             padding: 0.75rem;
             background-color: #007bff;
             border: none;
@@ -81,9 +87,26 @@ export default function HomePage() {
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
-          button:hover {
-            background-color: #0056b3;
+          button:disabled {
+            opacity: 0.6;
+            cursor: default;
+          }
+          .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
           }
           .footer {
             margin-top: 2rem;
@@ -115,7 +138,9 @@ export default function HomePage() {
           }}
         >
           <li>
-            <strong>Step 1:</strong> Export your ZoomInfo list as a CSV only.
+            <strong>Step 1:</strong> Export your ZoomInfo list to excel and
+            convert to a CSV with all the data, no need to remove anything or
+            switch anything around.
           </li>
           <li>
             <strong>Step 2:</strong> Upload the file using the{' '}
@@ -142,8 +167,11 @@ export default function HomePage() {
       </section>
 
       <div className='upload-section'>
-        <input id='csvFile' type='file' accept='.csv' required />
-        <button onClick={handleUpload}>Upload & Convert</button>
+        <input id='csvFile' type='file' accept='.csv' />
+        <button onClick={handleUpload} disabled={loading}>
+          {loading ? 'Processing' : 'Upload & Convert'}
+          {loading && <div className='spinner' />}
+        </button>
         {errorMessage && <p id='error-message'>{errorMessage}</p>}
       </div>
 
