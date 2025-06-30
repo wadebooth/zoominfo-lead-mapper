@@ -1,7 +1,8 @@
-import { IncomingForm } from 'formidable'
+import { IncomingForm, File } from 'formidable'
 import { parse as csvParse } from 'csv-parse/sync'
-import { mapRow, convertToCSV } from '@/utils/transform'
+import { mapRow, convertToCSV } from '../../utils/transform'
 import { NextApiRequest, NextApiResponse } from 'next'
+import fs from 'fs'
 
 export const config = {
   api: {
@@ -25,17 +26,22 @@ export default async function handler(
       return res.status(500).json({ error: 'Error parsing form data' })
     }
 
-    const file = files.file
-    if (!file || Array.isArray(file)) {
+    const uploaded = files.file
+    const file: File | undefined = Array.isArray(uploaded)
+      ? uploaded[0]
+      : uploaded
+
+    if (!file || !file.filepath) {
       return res.status(400).json({ error: 'Invalid or missing file' })
     }
 
     try {
-      const fileBuffer = await fs.promises.readFile(file.filepath) // read raw buffer
+      const fileBuffer = await fs.promises.readFile(file.filepath)
       const records = csvParse(fileBuffer.toString(), {
         columns: true,
         skip_empty_lines: true,
       })
+
       const mapped = records.map(mapRow)
       const csv = convertToCSV(mapped)
 
