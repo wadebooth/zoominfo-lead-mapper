@@ -143,32 +143,40 @@ export default function HomePage() {
           }}
         >
           <li>
-            <strong>Step 1:</strong> Export your ZoomInfo list as a CSV only.
+            <strong>Step 1:</strong> Export your full ZoomInfo list to Excel,
+            then “Save As” CSV. No need to delete or rearrange any columns.
           </li>
           <li>
-            <strong>Step 2:</strong> Upload the file using the{' '}
-            <code>Choose File</code> button below.
+            <strong>Step 2:</strong> Click <code>Choose File</code> below and
+            select your newly saved CSV.
           </li>
           <li>
-            <strong>Step 3:</strong> After conversion, download the mapped CSV
-            file by clicking the blue button.
+            <strong>Step 3:</strong> Hit the blue button. When it finishes, your
+            mapped file will download automatically.
+            <br />
+            <em>Tip:</em> To paste straight into your CRM, click cell A2, press{' '}
+            <code>Shift + ⌘ + →</code> then <code>Shift + ⌘ + ↓</code> to select
+            all, then <code>⌘ + C</code>. Switch to shared Excel for upload,
+            select the first empty cell in column A, and use <code>⌘ + V</code>.
           </li>
           <li>
-            <strong>Job Role & Function:</strong> Defaults to "Other" if blank
-            or mismatched.
+            <strong>Job Role & Function:</strong> Blank or unrecognized titles
+            default to <em>"Other"</em>. If your data is missing key info,
+            you’ll see empty fields—so double-check before importing.
           </li>
           <li>
             <strong>Assigned To:</strong> Defaults to{' '}
-            <code>your.email@company.com</code>. Replace with your email.
+            <code>your.name@email.com</code>. Be sure to replace it with your
+            own address. Happy converting!
           </li>
         </ul>
       </section>
 
       <div className='upload-section'>
-        <input id='csvFile' type='file' accept='.csv' required />
+        <input id='csvFile' type='file' accept='.csv' />
         <button onClick={handleUpload} disabled={loading}>
           {loading ? 'Processing' : 'Upload & Convert'}
-          {loading && <span className='spinner' />}
+          {loading && <div className='spinner' />}
         </button>
         {errorMessage && <p id='error-message'>{errorMessage}</p>}
       </div>
@@ -176,11 +184,13 @@ export default function HomePage() {
       <div className='footer'>
         <p>
           NOTE: This tool does not upload or store any data. Everything is
-          processed directly in your browser. Built by Wade Booth.
+          processed directly in your browser using what's called client-side
+          processing. This tool is an open-source personal project, and isn't
+          affiliated with any specific company. Built by Wade Booth.
         </p>
         <p className='github-link'>
           <a
-            href='https://github.com/wadebooth/zoominfo-lead-upload'
+            href='https://github.com/wadebooth/zoominfo-lead-mapper'
             target='_blank'
             rel='noopener noreferrer'
           >
