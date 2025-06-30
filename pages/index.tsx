@@ -194,6 +194,15 @@ export default function HomePage() {
           processing. This tool is an open-source personal project, and isn't
           affiliated with any specific company. Built by Wade Booth.
         </p>
+        <p className='github-link'>
+          <a
+            href='https://github.com/wadebooth/zoominfo-lead-mapper'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            View on GitHub
+          </a>
+        </p>
       </div>
     </div>
   )
