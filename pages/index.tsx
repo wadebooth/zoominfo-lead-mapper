@@ -163,8 +163,8 @@ export default function HomePage() {
             <br />
             <em>Tip:</em> To paste straight into your CRM, click cell A2, press{' '}
             <code>Shift + ⌘ + →</code> then <code>Shift + ⌘ + ↓</code> to select
-            all, then <code>⌘ + C</code>. Switch to CRM, select the first empty
-            cell in column A, and use <code>⌘ + V</code>.
+            all, then <code>⌘ + C</code>. Switch to shared Excel for upload,
+            select the first empty cell in column A, and use <code>⌘ + V</code>.
           </li>
           <li>
             <strong>Job Role & Function:</strong> Blank or unrecognized titles
