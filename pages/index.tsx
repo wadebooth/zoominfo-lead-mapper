@@ -34,10 +34,22 @@ export default function HomePage() {
     }
 
     const blob = await response.blob()
+
+    // after `const blob = await response.blob()`
+    const today = new Date()
+    const dd = String(today.getDate()).padStart(2, '0') // "30"
+    const mon = today.toLocaleString('en-US', { month: 'short' }).toUpperCase() // "JUN"
+    const yy = String(today.getFullYear()).slice(-2) // "25"
+    const dateCode = `${dd}${mon}${yy}` // "30JUN25"
+
+    // now pick a template that makes sense:
+    // e.g. region + source + date
+    const filename = `WestOutbound_ZoomInfo_${dateCode}.csv`
+
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'mapped.csv'
+    a.download = filename
     a.click()
     window.URL.revokeObjectURL(url)
     fileInput.value = ''
