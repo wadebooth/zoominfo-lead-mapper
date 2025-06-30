@@ -150,30 +150,31 @@ export default function HomePage() {
           }}
         >
           <li>
-            <strong>Step 1:</strong> Export your ZoomInfo list to excel and
-            convert to a CSV with all the data, no need to remove anything or
-            switch anything around.
+            <strong>Step 1:</strong> Export your full ZoomInfo list to Excel,
+            then “Save As” CSV. No need to delete or rearrange any columns.
           </li>
           <li>
-            <strong>Step 2:</strong> Upload the file using the{' '}
-            <code>Choose File</code> button below.
+            <strong>Step 2:</strong> Click <code>Choose File</code> below and
+            select your newly saved CSV.
           </li>
           <li>
-            <strong>Step 3:</strong> After conversion, download the mapped CSV
-            file by clicking the blue button.
+            <strong>Step 3:</strong> Hit the blue button. When it finishes, your
+            mapped file will download automatically.
             <br />
-            <em>Tip:</em> Click cell A2, then press <code>Shift + Cmd + →</code>{' '}
-            followed by <code>Shift + Cmd + ↓</code> to highlight all data. Use{' '}
-            <code>Cmd + C</code> to copy, then paste into the first open row
-            under column A using <code>Cmd + V</code>.
+            <em>Tip:</em> To paste straight into your CRM, click cell A2, press{' '}
+            <code>Shift + ⌘ + →</code> then <code>Shift + ⌘ + ↓</code> to select
+            all, then <code>⌘ + C</code>. Switch to CRM, select the first empty
+            cell in column A, and use <code>⌘ + V</code>.
           </li>
           <li>
-            <strong>Job Role & Function:</strong> If fields are blank or
-            mismatched, it will default to <em>"Other"</em>.
+            <strong>Job Role & Function:</strong> Blank or unrecognized titles
+            default to <em>"Other"</em>. If your data is missing key info,
+            you’ll see empty fields—so double-check before importing.
           </li>
           <li>
-            <strong>Assigned To:</strong> Output defaults to{' '}
-            <code>your.name@email.com</code>. Replace with your email.
+            <strong>Assigned To:</strong> Defaults to{' '}
+            <code>your.name@email.com</code>. Be sure to replace it with your
+            own address. Happy converting!
           </li>
         </ul>
       </section>
