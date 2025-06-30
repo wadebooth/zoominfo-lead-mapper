@@ -32,8 +32,7 @@ export default async function handler(
 
     if (!file?.filepath) {
       console.error('No file or filepath found:', files)
-      res.status(400).json({ error: 'Invalid or missing file upload' })
-      return
+      return res.status(400).json({ error: 'Invalid or missing file upload' })
     }
 
     const raw = await fs.promises.readFile(file.filepath)
@@ -44,14 +43,14 @@ export default async function handler(
         skip_empty_lines: true,
         relax_quotes: true,
         relax_column_count: true,
+        quote: '',
       })
     } catch (parseErr) {
       console.error('CSV parse error:', parseErr)
-      res.status(422).json({
+      return res.status(422).json({
         error: 'Unable to parse CSV',
         details: (parseErr as Error).message,
       })
-      return
     }
 
     const mapped = records.map(mapRow)
@@ -59,10 +58,10 @@ export default async function handler(
 
     res.setHeader('Content-Disposition', 'attachment; filename="mapped.csv"')
     res.setHeader('Content-Type', 'text/csv')
-    res.status(200).send(outCsv)
+    return res.status(200).send(outCsv)
   } catch (err) {
     console.error('Unexpected handler error:', err)
-    res
+    return res
       .status(500)
       .json({ error: 'Internal server error', details: (err as Error).message })
   }
