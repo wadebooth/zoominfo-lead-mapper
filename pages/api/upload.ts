@@ -1,11 +1,6 @@
 import { IncomingForm } from 'formidable'
-import type formidable from 'formidable'
-
-import fs from 'fs'
-import path from 'path'
-import { mapRow, convertToCSV } from '../../utils/transform'
-
-import { parse as csvParse } from 'csv-parse'
+import { parse as csvParse } from 'csv-parse/sync'
+import { mapRow, convertToCSV } from '@/utils/transform'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export const config = {
@@ -14,44 +9,33 @@ export const config = {
   },
 }
 
-function parseCSV(filePath: string): Promise<Record<string, string>[]> {
-  return new Promise((resolve, reject) => {
-    const records: Record<string, string>[] = []
-    fs.createReadStream(filePath)
-      .pipe(csvParse({ columns: true, skip_empty_lines: true }))
-      .on('data', (row) => records.push(row))
-      .on('end', () => resolve(records))
-      .on('error', (err) => reject(err))
-  })
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' })
-    return
-  }
-
-  const form = new IncomingForm({ keepExtensions: true })
+  const form = new IncomingForm({
+    keepExtensions: true,
+    maxFileSize: 5 * 1024 * 1024,
+    multiples: false,
+  })
 
   form.parse(req, async (err, fields, files) => {
     if (err) {
-      res.status(500).json({ error: 'Error parsing file' })
-      return
+      console.error('Form parse error:', err)
+      return res.status(500).json({ error: 'Error parsing form data' })
     }
 
-    const rawFile = files.file
-    const file = Array.isArray(rawFile) ? rawFile[0] : rawFile
-
-    if (!file || !('filepath' in file)) {
-      res.status(400).json({ error: 'Missing file or invalid format' })
-      return
+    const file = files.file
+    if (!file || Array.isArray(file)) {
+      return res.status(400).json({ error: 'Invalid or missing file' })
     }
 
     try {
-      const records = await parseCSV(file.filepath)
+      const fileBuffer = await fs.promises.readFile(file.filepath) // read raw buffer
+      const records = csvParse(fileBuffer.toString(), {
+        columns: true,
+        skip_empty_lines: true,
+      })
       const mapped = records.map(mapRow)
       const csv = convertToCSV(mapped)
 
