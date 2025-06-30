@@ -43,7 +43,6 @@ export default async function handler(
         skip_empty_lines: true,
         relax_quotes: true,
         relax_column_count: true,
-        quote: '',
       })
     } catch (parseErr) {
       console.error('CSV parse error:', parseErr)

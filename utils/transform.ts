@@ -1,10 +1,6 @@
-// @ts-ignore
-const { parse } = require('json2csv')
 import jobLevelMapping from '../job-level-mapping.json'
 
 const ASSIGNED_TO = 'your.email@company.com'
-
-/* --- Helpers --- */
 
 const fallback = (...values: (string | undefined)[]) =>
   values.find((v) => v?.trim())?.trim() || ''
@@ -23,8 +19,6 @@ export const getListSource = () => {
   const year = now.getFullYear().toString().slice(-2)
   return `Import-Zoominfo-WestOutbound-${day}${month}${year}`
 }
-
-/* --- Job Logic --- */
 
 export const validJobRoles = [
   'Cloud Operations',
@@ -115,7 +109,7 @@ const csuiteRoleMap: Record<string, string> = {
   'General Counsel': 'Legal',
 }
 
-const mapJobLevel = (title: string = ''): string => {
+const mapJobLevel = (title = ''): string => {
   const lower = title.toLowerCase()
   for (const [level, keywords] of Object.entries(jobLevelMapping)) {
     if (
@@ -131,8 +125,6 @@ const mapJobLevel = (title: string = ''): string => {
   }
   return 'Other'
 }
-
-/* --- Location Abbreviations --- */
 
 const STATE_ABBREVIATIONS: Record<string, string> = {
   Alabama: 'AL',
@@ -185,19 +177,6 @@ const STATE_ABBREVIATIONS: Record<string, string> = {
   'West Virginia': 'WV',
   Wisconsin: 'WI',
   Wyoming: 'WY',
-  Alberta: 'AB',
-  'British Columbia': 'BC',
-  Manitoba: 'MB',
-  'New Brunswick': 'NB',
-  'Newfoundland and Labrador': 'NL',
-  'Northwest Territories': 'NT',
-  'Nova Scotia': 'NS',
-  Nunavut: 'NU',
-  Ontario: 'ON',
-  'Prince Edward Island': 'PE',
-  Quebec: 'QC',
-  Saskatchewan: 'SK',
-  Yukon: 'YT',
 }
 
 const COUNTRY_ABBREVIATIONS: Record<string, string> = {
@@ -205,40 +184,32 @@ const COUNTRY_ABBREVIATIONS: Record<string, string> = {
   Canada: 'CA',
 }
 
-/* --- Main Mapping --- */
-
 export function mapRow(row: Record<string, string>): Record<string, string> {
   const normalize = (val = '') => val.trim().toUpperCase()
   const stateRaw = fallback(row['Company State'], row['Person State'])
-  const normalizedState = normalize(stateRaw)
-  const state = STATE_ABBREVIATIONS[normalizedState] || normalizedState
-
+  const state = STATE_ABBREVIATIONS[normalize(stateRaw)] || normalize(stateRaw)
   const countryRaw = fallback(row['Company Country'], row['Country'])
-  const normalizedCountry = normalize(countryRaw)
-  const country = COUNTRY_ABBREVIATIONS[normalizedCountry] || normalizedCountry
-
+  const country =
+    COUNTRY_ABBREVIATIONS[normalize(countryRaw)] || normalize(countryRaw)
   const jobTitle = row['Job Title'] || ''
   const upperTitle = jobTitle.toUpperCase()
   const department = row['Department']?.trim() || ''
 
   let finalJobFunction = 'Other'
   let finalJobRole = 'Other'
-
   const tokens = upperTitle
     .split(/[/,&|]+/)
     .map((t) => t.trim())
     .filter(Boolean)
-
-  const allAreCSuite = tokens.every((t) => validCSuiteRoles.includes(t))
-  const anyAreCSuite = tokens.some((t) => validCSuiteRoles.includes(t))
-
-  if (allAreCSuite) {
+  const allCSuite = tokens.every((t) => validCSuiteRoles.includes(t))
+  const anyCSuite = tokens.some((t) => validCSuiteRoles.includes(t))
+  if (allCSuite) {
     const primary = tokens.find((t) => csuiteRoleMap[t])
     if (primary) {
       finalJobFunction = primary
       finalJobRole = csuiteRoleMap[primary]
     }
-  } else if (anyAreCSuite) {
+  } else if (anyCSuite) {
     finalJobFunction = 'Other'
     finalJobRole = 'Other'
   } else if (validJobRoles.includes(department)) {
@@ -253,7 +224,6 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
   const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone'])
   const cleanedDirect = cleanPhone(rawDirect)
   const cleanedMobile = cleanPhone(rawMobile)
-
   const businessPhone = cleanedDirect || cleanedMobile || '0000000000'
   const mobilePhone =
     cleanedDirect && cleanedMobile && cleanedDirect !== cleanedMobile
@@ -308,9 +278,7 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
   }
 }
 
-/* --- Headers --- */
-
-export const HEADERS = [
+export const HEADERS: string[] = [
   'First Name',
   'Last Name',
   'Title',
@@ -353,8 +321,14 @@ export const HEADERS = [
   'Process Rule',
 ]
 
-/* --- Export to CSV --- */
-
+/**
+ * Converts mapped data to a tab-delimited text (TSV) without any quotes.
+ */
 export function convertToCSV(data: Record<string, string>[]): string {
-  return parse(data, { fields: HEADERS })
+  const delimiter = '\t'
+  const headerLine = HEADERS.join(delimiter)
+  const lines = data.map((row) =>
+    HEADERS.map((h) => row[h] ?? '').join(delimiter)
+  )
+  return [headerLine, ...lines].join('\n')
 }

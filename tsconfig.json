@@ -8,11 +8,7 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "noEmit": true,
     "incremental": true,
@@ -21,23 +17,10 @@
   },
   "baseUrl": ".",
   "paths": {
-    "@/*": [
-      "./*"
-    ],
-    "include": [
-      "./**/*.ts",
-      "json2csv.d.ts"
-    ],
-    "exclude": [
-      "node_modules"
-    ]
+    "@/*": ["./*"],
+    "include": ["./**/*.ts", "json2csv.d.ts"],
+    "exclude": ["node_modules"]
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "global.d.ts"],
+  "exclude": ["node_modules"]
 }
