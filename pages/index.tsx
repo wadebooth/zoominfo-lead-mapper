@@ -154,10 +154,12 @@ export default function HomePage() {
             <strong>Step 3:</strong> Hit the blue button. When it finishes, your
             mapped file will download automatically.
             <br />
-            <em>Tip:</em> To paste straight into your CRM, click cell A2, press{' '}
-            <code>Shift + ⌘ + →</code> then <code>Shift + ⌘ + ↓</code> to select
-            all, then <code>⌘ + C</code>. Switch to shared Excel for upload,
-            select the first empty cell in column A, and use <code>⌘ + V</code>.
+            <em>Tip:</em> To paste straight into the lead list upload excel,
+            click cell A2, press <code>Shift + ⌘ + →</code> until every field to
+            column AN is highlighted, then <code>Shift + ⌘ + ↓</code> to select
+            all rows of leads, then <code>⌘ + C</code> or copy. Switch to shared
+            Excel for upload, select the first empty cell in column A, and use{' '}
+            <code>⌘ + V</code> or paste.
           </li>
           <li>
             <strong>Job Role & Function:</strong> Blank or unrecognized titles
