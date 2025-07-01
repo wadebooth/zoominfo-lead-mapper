@@ -50,6 +50,7 @@ export default function HomePage() {
         <title>ZoomInfo Lead Mapper</title>
         <meta charSet='UTF-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <link rel='icon' href='/favicon.png' type='image/png' />
         <style>{`
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
