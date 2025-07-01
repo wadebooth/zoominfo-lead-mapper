@@ -55,8 +55,8 @@ export default async function handler(
     const mapped = records.map(mapRow)
     const outCsv = convertToCSV(mapped)
 
-    res.setHeader('Content-Disposition', 'attachment; filename="mapped.csv"')
-    res.setHeader('Content-Type', 'text/csv')
+    res.setHeader('Content-Disposition', 'attachment; filename="mapped.tsv"')
+    res.setHeader('Content-Type', 'text/tab-separated-values')
     return res.status(200).send(outCsv)
   } catch (err) {
     console.error('Unexpected handler error:', err)

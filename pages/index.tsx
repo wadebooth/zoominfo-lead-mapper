@@ -35,7 +35,7 @@ export default function HomePage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'mapped.csv'
+      a.download = 'mapped.tsv'
       a.click()
       window.URL.revokeObjectURL(url)
       fileInput.value = ''
