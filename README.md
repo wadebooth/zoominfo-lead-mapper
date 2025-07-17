@@ -15,3 +15,5 @@ Features
 --No third-party services or data storage
 
 --Ready for deployment to Firebase, Vercel, or similar
+
+**Disclaimer:** This tool is a personal project and not affiliated with any employer. It processes data entirely on the client side or in ephemeral server memory. No data is stored or transmitted externally.
