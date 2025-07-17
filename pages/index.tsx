@@ -186,10 +186,11 @@ export default function HomePage() {
 
       <div className='footer'>
         <p>
-          NOTE: This tool does not upload or store any data. Everything is
-          processed directly in your browser using what's called client-side
-          processing. This tool is an open-source personal project, and isn't
-          affiliated with any specific company. Built by Wade Booth.
+          Disclaimer: This is a personal open-source project built by Wade
+          Booth. It does not store, transmit, or upload any data. All processing
+          is done locally in the browser or server memory and no information is
+          persisted. This tool is not affiliated with, endorsed by, or
+          representative of any employer or organization.
         </p>
         <p className='github-link'>
           <a
