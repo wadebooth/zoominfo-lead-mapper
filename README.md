@@ -8,8 +8,6 @@ Features
 
 --Removes duplicate phone numbers (e.g., if mobile = direct)
 
---Converts full state/country names into abbreviations
-
 --Outputs a CRM-ready CSV file with predefined headers
 
 --No third-party services or data storage
