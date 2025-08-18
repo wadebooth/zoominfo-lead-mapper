@@ -5,8 +5,9 @@ const ASSIGNED_TO = 'your.email@company.com'
 const fallback = (...values: (string | undefined)[]) =>
   values.find((v) => v?.trim())?.trim() || ''
 
-const cleanPhone = (phone: string) => {
-  const digits = phone?.replace(/\D/g, '') || ''
+// Normalize a single phone string to 10 digits. Returns '' if not valid.
+const cleanPhone = (phone?: string) => {
+  const digits = (phone || '').replace(/\D/g, '')
   if (digits.length === 10) return digits
   if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1)
   return ''
@@ -217,18 +218,26 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
     finalJobFunction = `${department} - Other`
   }
 
-  const rawDirect = fallback(
+  const hqPhoneRaw = row['Company HQ Phone'] || ''
+  const cleanedHQ = cleanPhone(hqPhoneRaw)
+
+  const directCandidate = fallback(
     row['Direct Phone Number'],
-    row['Company HQ Phone']
+    row['Direct Dial'],
+    row['Business Phone']
   )
-  const rawMobile = fallback(row['Mobile phone'], row['Mobile Phone'])
-  const cleanedDirect = cleanPhone(rawDirect)
-  const cleanedMobile = cleanPhone(rawMobile)
-  const businessPhone = cleanedDirect || cleanedMobile || '0000000000'
-  const mobilePhone =
-    cleanedDirect && cleanedMobile && cleanedDirect !== cleanedMobile
-      ? cleanedMobile
-      : ''
+  const mobileCandidate = fallback(row['Mobile phone'], row['Mobile Phone'])
+
+  const cleanedDirect = cleanPhone(directCandidate)
+  const cleanedMobile = cleanPhone(mobileCandidate)
+
+  // Business Phone: prefer Direct, else HQ, else Mobile, else HQ again
+  const businessPhone = cleanedDirect || cleanedHQ || cleanedMobile || cleanedHQ
+
+  // Mobile Phone: prefer Mobile, else HQ
+  const mobilePhone = cleanedMobile || cleanedHQ
+
+  // ---------------------------------------------------------------------------
 
   return {
     'First Name': row['First Name'] || '',
