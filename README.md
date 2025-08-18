@@ -6,8 +6,6 @@ Features
 
 --Automatically maps and cleans contact fields
 
---Removes duplicate phone numbers (e.g., if mobile = direct)
-
 --Outputs a CRM-ready CSV file with predefined headers
 
 --No third-party services or data storage
