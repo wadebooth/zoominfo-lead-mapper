@@ -18,7 +18,7 @@ export const getListSource = () => {
   const day = String(now.getDate()).padStart(2, '0')
   const month = now.toLocaleString('en-US', { month: 'short' }).toUpperCase()
   const year = now.getFullYear().toString().slice(-2)
-  return `Import-Zoominfo-WestOutbound-${day}${month}${year}`
+  return `PROS-SalesProspectingGlobal-01MAR25-Global`
 }
 
 export const validJobRoles = [
@@ -260,7 +260,7 @@ export function mapRow(row: Record<string, string>): Record<string, string> {
       row['Person Zip'],
       row['Zip']
     ),
-    'Lead Source Recent': 'ADR Prospecting-IT-AMS West Sourced',
+    'Lead Source Recent': 'PROS-SalesProspectingGlobal-01MAR25-Global',
     'Member Status': '',
     ExplicitConsentDate: '',
     ExplicitConsentSource: '',
